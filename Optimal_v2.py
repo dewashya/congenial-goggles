@@ -18,6 +18,7 @@ class NAVUpdater:
         self.meta_data_list = []
         self.existing_data = set()
         self.logger = logging.getLogger(__name__)
+        self.na_error = list()
 
     @staticmethod
     def convert_date_to_utc_datetime(date_string):
@@ -98,8 +99,9 @@ class NAVUpdater:
                     try:
                         code = int(split[0].strip())
                     except:
+                        self.na_error.append(split)
                         code = input(f"this is not right {code} do you want to put something there?")
-                    
+
                     name = str(split[1].strip())
                     
                     if "growth" in name.lower():
@@ -119,7 +121,7 @@ class NAVUpdater:
                     try:
                         nav = float(split[4].strip())
                     except:
-                        print(f"This is not a float nav value {split[4]}")
+                        self.na_error.append(split)
                         nav = split[4].strip()
 
                     date = self.convert_date_to_utc_datetime(split[7].strip())
