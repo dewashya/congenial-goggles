@@ -72,7 +72,7 @@ class NAVUpdater:
 
                 if split[0] == "":
                     if dut[j] == dut[j + 1]:
-                        # Open Ended Schemes (Equity Scheme - Mid Cap Fund)
+                        # for eg : Open Ended Schemes (Equity Scheme - Mid Cap Fund)
                         sch_cat = dut[j - 1].split("(")
                         sch_cat[-1] = sch_cat[-1][:-2].strip()
                         sch_cat = [i.strip() for i in sch_cat]
@@ -94,12 +94,12 @@ class NAVUpdater:
                     elif "Mutual Fund" in dut[j + 1]:
                         amc = dut[j + 1]
 
-                elif len(split) > 1:
+                elif len(split) == 8:
                     try:
                         code = int(split[0].strip())
                     except:
                         code = input(f"this is not right {code} do you want to put something there?")
-
+                    
                     name = str(split[1].strip())
                     
                     if "growth" in name.lower():
@@ -119,6 +119,7 @@ class NAVUpdater:
                     try:
                         nav = float(split[4].strip())
                     except:
+                        print(f"This is not a float nav value {split[4]}")
                         nav = split[4].strip()
 
                     date = self.convert_date_to_utc_datetime(split[7].strip())

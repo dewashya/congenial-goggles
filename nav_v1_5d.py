@@ -122,6 +122,7 @@ def nav_data(start,end):
             try:
                 nav = float(split[4].strip()) 
             except:
+                print(f"This is not a float nav value {split[4]}")
                 nav = split[4].strip()
            
             date = convert_date_to_utc_datetime(split[7].strip())
