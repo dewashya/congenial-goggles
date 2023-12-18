@@ -64,6 +64,7 @@ class NAVUpdater:
             j = 1
 
             dut = data.split("\r\n")
+            print(dut[0],dut[-1])
             self.logger.info(f"Number of lines in data: {len(dut)}")
             for lines in dut[1:]:
                 split = lines.split(";")
@@ -123,9 +124,11 @@ class NAVUpdater:
                     except:
                         self.na_error.append(split)
                         nav = split[4].strip()
-
-                    date = self.convert_date_to_utc_datetime(split[7].strip())
-
+                    try:
+                        date = self.convert_date_to_utc_datetime(split[7].strip())
+                    except:
+                        print(f"this {lines}")
+                    
                     self.nav_data_list.append({
                         "date": date,
                         "Code": code,
