@@ -13,9 +13,10 @@ class Err:
         self.url = f"https://portal.amfiindia.com/DownloadNAVHistoryReport_Po.aspx?&frmdt={self.start}&todt=10-Apr-2006" #{self.end}"
 
     async def get_corrupted_data(self):
-        a = await aiohttp.ClientSession().get(self.url)
-        b = await aiohttp.ClientSession().get(self.url)
-        return a,b
+        async with aiohttp.ClientSession() as session:
+            a = await session.get(self.url)
+            b = await session.get(self.url)
+        a,b
     
 asyncio.run(Err().get_corrupted_data())
 
