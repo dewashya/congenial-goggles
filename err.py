@@ -14,9 +14,10 @@ class Err:
 
     async def get_corrupted_data(self):
         async with aiohttp.ClientSession() as session:
-            a = await session.get(self.url)
-            b = await session.get(self.url)
-        a,b
+            async with session.get(self.url) as response:
+                a = await response.text()
+                b = await response.text()    
+        return print(a,b)
     
 asyncio.run(Err().get_corrupted_data())
 
