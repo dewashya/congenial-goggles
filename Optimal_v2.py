@@ -124,6 +124,7 @@ class NAVUpdater:
                     except:
                         self.na_error.append(split)
                         nav = split[4].strip()
+                        
                     try:
                         date = self.convert_date_to_utc_datetime(split[7].strip())
                     except:
