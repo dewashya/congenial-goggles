@@ -6,7 +6,6 @@ import asyncio
 import datetime
 import aiohttp
 import pandas
-import numpy
 class Err:
     def __init__(self):
         self.start = "03-Apr-2006"
@@ -25,7 +24,6 @@ class Err:
                 bdf = pandas.DataFrame([j.split(";") for j in b0data[1:]],columns=b0data[0].split(";") )
                 print(adf.head())
                 print(bdf.head())
-                print(a0data[:10])
         return 
 asyncio.run(Err().get_corrupted_data())
 
