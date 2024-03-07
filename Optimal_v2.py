@@ -12,7 +12,6 @@ start_time = time.time()
 class NAVUpdater:
     '''
     This module will help you to download and load Mutual Funds data from AMFI website.
-    The data will be split, into nav data and a meta data.
     '''
     def __init__(self, mongo_uri, database_name, nav_collection_name, meta_collection_name):
         self.mongo_client = pymongo.MongoClient(mongo_uri)
