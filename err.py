@@ -22,8 +22,10 @@ class Err:
                 b0data = b.split("\r\n")
                 adf = pandas.DataFrame([i.split(";") for i in a0data[1:]],columns=a0data[0].split(";") )
                 bdf = pandas.DataFrame([j.split(";") for j in b0data[1:]],columns=b0data[0].split(";") )
-                print(adf.head())
-                print(bdf.head())
+                adf.infer_objects()
+                bdf.infer_objects()
+                print(adf.columns, adf.head(10))
+                print(bdf.columns, bdf.head(10))
         return 
 asyncio.run(Err().get_corrupted_data())
 
