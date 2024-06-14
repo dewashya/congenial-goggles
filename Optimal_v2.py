@@ -180,11 +180,11 @@ class NAVUpdater:
             # Start from the next day after the last date updated
             start_date = last_date_updated + timedelta(days=1)
             start_date_str = start_date.strftime('%d-%b-%Y')
-            end_date_str = (datetime.utcnow() - timedelta(days=1)).strftime('%d-%b-%Y')
+            end_date_str = (datetime.now(datetime.UTC) - timedelta(days=1)).strftime('%d-%b-%Y')
         else:
             # If there is no data, start from 3rd April 2006
             start_date_str = "03-Apr-2006"
-            end_date_str = (datetime.utcnow() - timedelta(days=1)).strftime('%d-%b-%Y')
+            end_date_str = (datetime.now(datetime.UTC) - timedelta(days=1)).strftime('%d-%b-%Y')
 
         date_ranges = self.split_date_range(start_date_str, end_date_str)
 
