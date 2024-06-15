@@ -1,5 +1,8 @@
 """
 In this Script I try to extract Error NAV value and Scheme Code
+
+The main problem is in NAV there are some error value which is not the ideal float value. i want to figure out those rows and 
+keep them to refer again while cleaning the data. 
 """
 
 import asyncio
@@ -24,8 +27,9 @@ class Err:
                 bdf = pandas.DataFrame([j.split(";") for j in b0data[1:]],columns=b0data[0].split(";") )
                 adf.infer_objects()
                 bdf.infer_objects()
-                print(adf.columns, adf.head(10))
-                print(bdf.columns, bdf.head(10))
+                print(adf.head())
+                print(list(adf["Net Asset Value"]))
+                print(list(bdf["Net Asset Value"]))
         return 
 asyncio.run(Err().get_corrupted_data())
 

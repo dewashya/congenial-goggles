@@ -48,6 +48,8 @@ class NAVUpdater:
             current_date = sub_range_end + timedelta(days=1)
 
         return date_ranges
+    
+    
     def splitnshape(data):
         '''
         I will try to Make my code more use-able. i will split the below code such that the spliting of data is 
