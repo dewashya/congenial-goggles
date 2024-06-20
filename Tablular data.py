@@ -18,7 +18,9 @@ class Err:
         self.end = (datetime.date.today()-datetime.timedelta(days=1)).strftime("%d-%b-%Y")
         self.url = f"https://portal.amfiindia.com/DownloadNAVHistoryReport_Po.aspx?&frmdt={self.start}&todt={self.end}"
         print(self.url)
-        
+        self.cnx = mysql.connector.connect(user='root', password='De$#Ka@)*01Zz')
+        if self.cnx.is_connected() == True:
+            print("Connection made!")
 
     def split_date(self, start_date, end_date, ran):
         start_date= datetime.strptime(start_date, "%d-%b-%Y")
@@ -39,9 +41,7 @@ class Err:
         return date_ranges
 
     def check_db(self):
-        cnx = mysql.connector.connect(user='root', password='De$#Ka@)*01Zz')
-        print(cnx.is_connected())
-        cnx.close()
+        self.cnx.close()
         
 
     async def get_corrupted_data(self):
