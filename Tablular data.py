@@ -9,27 +9,51 @@ import asyncio
 import datetime
 import aiohttp
 import pandas
+import mysql.connector
+
+
 class Err:
     def __init__(self):
         self.start = "03-Apr-2006"
-        self.end = datetime.date.today().strftime("%d-%b-%Y")
-        #print(self.end)
-        self.url = f"https://portal.amfiindia.com/DownloadNAVHistoryReport_Po.aspx?&frmdt={self.start}&todt=10-Apr-2006" #{self.end}" 
+        self.end = (datetime.date.today()-datetime.timedelta(days=1)).strftime("%d-%b-%Y")
+        self.url = f"https://portal.amfiindia.com/DownloadNAVHistoryReport_Po.aspx?&frmdt={self.start}&todt={self.end}"
+        print(self.url)
+        
+
+    def split_date(self, start_date, end_date, ran):
+        start_date= datetime.strptime(start_date, "%d-%b-%Y")
+        end_date = datetime.strptime(end_date, "%d-%b-%Y")
+
+        date_ranges = []
+        range_start = start_date
+
+        while start_date < end_date:
+            range_end = range_start + datetime.timedelta(days=ran - 1)
+
+            if range_end > end_date:
+                range_end = end_date
+
+            date_ranges.append((range_start, range_end))
+            range_start = range_end + datetime.timedelta(days=1)
+        
+        return date_ranges
+
+    def check_db(self):
+        cnx = mysql.connector.connect(user='root', password='De$#Ka@)*01Zz')
+        print(cnx.is_connected())
+        cnx.close()
+        
 
     async def get_corrupted_data(self):
         async with aiohttp.ClientSession() as session:
             async with session.get(self.url) as response:
                 a = await response.text()
-                b = await response.text()
-                a0data = a.split("\r\n")
-                b0data = b.split("\r\n")
-                adf = pandas.DataFrame([i.split(";") for i in a0data[1:]],columns=a0data[0].split(";") )
-                bdf = pandas.DataFrame([j.split(";") for j in b0data[1:]],columns=b0data[0].split(";") )
-                adf.infer_objects()
-                bdf.infer_objects()
-                print(adf.head())
-                print(list(adf["Net Asset Value"]))
-                print(list(bdf["Net Asset Value"]))
-        return 
-asyncio.run(Err().get_corrupted_data())
+        return a
+    
+    # def get_data():
+        
+    
+aa = Err()
+aa.check_db()
+# asyncio.run(Err().get_corrupted_data())
 
