@@ -6,7 +6,7 @@ keep them to refer again while cleaning the data.
 """
 
 import asyncio
-import datetime
+from datetime import datetime, timedelta
 import aiohttp
 import pandas
 import mysql.connector
@@ -14,46 +14,74 @@ import mysql.connector
 
 class Err:
     def __init__(self):
-        self.start = "03-Apr-2006"
-        self.end = (datetime.date.today()-datetime.timedelta(days=1)).strftime("%d-%b-%Y")
-        self.url = f"https://portal.amfiindia.com/DownloadNAVHistoryReport_Po.aspx?&frmdt={self.start}&todt={self.end}"
-        print(self.url)
         self.cnx = mysql.connector.connect(user='root', password='De$#Ka@)*01Zz')
         if self.cnx.is_connected() == True:
             print("Connection made!")
+        self.links = self.linkgen()
+        
 
-    def split_date(self, start_date, end_date, ran):
+    def split_date(self, start_date, end_date, ran=90)-> list:
         start_date= datetime.strptime(start_date, "%d-%b-%Y")
         end_date = datetime.strptime(end_date, "%d-%b-%Y")
-
         date_ranges = []
         range_start = start_date
-
-        while start_date < end_date:
-            range_end = range_start + datetime.timedelta(days=ran - 1)
+        while range_start < end_date:
+            range_end = range_start + timedelta(days=ran - 1)
 
             if range_end > end_date:
                 range_end = end_date
 
             date_ranges.append((range_start, range_end))
-            range_start = range_end + datetime.timedelta(days=1)
+            range_start = range_end + timedelta(days=1)
         
         return date_ranges
+    
+    def linkgen(self):
+        start = "03-Apr-2006"
+        end = (datetime.today()- timedelta(days=1)).strftime("%d-%b-%Y")
+        date = self.split_date(start, end)
+        links = []
+        for a,b in date:
+            url = f"https://portal.amfiindia.com/DownloadNAVHistoryReport_Po.aspx?&frmdt={a.strftime('%d-%b-%Y')}&todt={b.strftime('%d-%b-%Y')}"
+            links.append(url)
+        return links
 
-    def check_db(self):
+    def check_db(self, dbname: str) -> bool:
+        a = self.cnx.cursor()
+        a.execute("SHOW DATABASES;")
+        dbl = []
+        for n in a:
+            dbl.append(n[0])
+        if dbname not in dbl:
+            print("i did execute")
+            a.execute(f"CREATE DATABASE IF NOT EXISTS {dbname};")
         self.cnx.close()
         
 
     async def get_corrupted_data(self):
-        async with aiohttp.ClientSession() as session:
-            async with session.get(self.url) as response:
-                a = await response.text()
-        return a
+        timeout = aiohttp.ClientTimeout(total=10)
+        async with aiohttp.ClientSession(timeout=timeout) as sessions:
+            result = [sessions.get(i) for i in self.links]
+            print(len(result))
+            response = await asyncio.gather(*result, return_exceptions=True)
+        ri = []
+        for a in response:
+            if isinstance(response, Exception):
+                print(f"\nException occurred: {response}")
+            else:
+                ri.append(response)
+        return ri
     
+    
+        
     # def get_data():
         
     
 aa = Err()
-aa.check_db()
-# asyncio.run(Err().get_corrupted_data())
-
+aa.check_db("dbname")
+ts = datetime.now()
+txt = asyncio.run(aa.get_corrupted_data())
+te = datetime.now()
+print(txt)
+ti = te-ts
+print(ti)
