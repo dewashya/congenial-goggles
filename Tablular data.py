@@ -10,6 +10,7 @@ from datetime import datetime, timedelta
 import aiohttp
 import pandas
 import mysql.connector
+import requests
 
 
 class Err:
@@ -59,19 +60,18 @@ class Err:
         
 
     async def get_corrupted_data(self):
-        timeout = aiohttp.ClientTimeout(total=10)
-        async with aiohttp.ClientSession(timeout=timeout) as sessions:
-            result = [sessions.get(i) for i in self.links]
-            print(len(result))
-            response = await asyncio.gather(*result, return_exceptions=True)
-        ri = []
-        for a in response:
-            if isinstance(response, Exception):
-                print(f"\nException occurred: {response}")
-            else:
-                ri.append(response)
+        async with aiohttp.ClientSession() as session:
+            result = [session.get(i) for i in self.links]
+            response = await asyncio.gather(*result)
+            ri = []
+            for i in response:
+                print(i.status)
+                ri.append(await i.text())
         return ri
     
+    def transform(self, txt):
+        data = txt.split("\r\n")
+        
     
         
     # def get_data():
