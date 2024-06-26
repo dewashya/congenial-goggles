@@ -7,7 +7,6 @@ keep them to refer again while cleaning the data.
 import asyncio
 from datetime import datetime, timedelta
 import aiohttp
-import pandas
 import mysql.connector
 
 
@@ -65,7 +64,7 @@ class Err:
             ri = []
             for i in response:
                 print(i.status)
-                ri.append(await i.text().split("\r\n"))
+                ri.append(await i.text())
         return ri
     
 
@@ -74,6 +73,7 @@ class Err:
         final = []
         error = []
         for i in txt:
+            i= i.split("\r\n")
             n = 1
             for j in i[1:]:
                 l = j.split(";")
@@ -155,12 +155,3 @@ class Err:
     # def get_data():
         
     
-aa = Err()
-aa.check_db("dbname")
-ts = datetime.now()
-txt = asyncio.run(aa.get_corrupted_data())
-te = datetime.now()
-print(txt)
-ti = te-ts
-print(ti)
-data = aa.transform(txt)
