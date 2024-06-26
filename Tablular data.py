@@ -4,13 +4,12 @@ In this Script I try to extract Error NAV value and Scheme Code
 The main problem is in NAV there are some error value which is not the ideal float value. i want to figure out those rows and 
 keep them to refer again while cleaning the data. 
 """
-
 import asyncio
 from datetime import datetime, timedelta
 import aiohttp
 import pandas
 import mysql.connector
-import requests
+
 
 
 class Err:
@@ -66,13 +65,92 @@ class Err:
             ri = []
             for i in response:
                 print(i.status)
-                ri.append(await i.text())
+                ri.append(await i.text().split("\r\n"))
         return ri
     
+
     def transform(self, txt):
-        data = txt.split("\r\n")
-        
-    
+        all = []
+        final = []
+        error = []
+        for i in txt:
+            n = 1
+            for j in i[1:]:
+                l = j.split(";")
+                if l[0] == "":
+                    if i[n] == i[n+1]:
+                        sch_cat = i[n-1].split("(")
+                        sch_cat[-1]=sch_cat[-1][:-2].strip()
+                        sch_cat = [i.strip() for i in sch_cat]
+                        if "-" in sch_cat[1]:
+                            sch_sub_cat = sch_cat[1].split("-")
+                            sch_sub_cat = [i.strip() for i in sch_sub_cat]
+                            sch_cat.pop(-1)
+                            sch_cat = sch_cat+sch_sub_cat
+                        else:
+                            sch_sub_cat = ["",sch_cat[1]]
+                            sch_cat.pop(-1)
+                            sch_cat = sch_cat+sch_sub_cat 
+                        Structure = sch_cat[0]
+                        Category = sch_cat[1]
+                        Sub_Category = sch_cat[2]
+                    elif "Mutual Fund" in i[n+1]:
+                        amc = i[n+1]
+                elif len(l)>1:
+                    code = int(l[0].strip())
+                    name = str(l[1].strip())
+                    if "growth" in name.lower():
+                        dg = "Growth"
+                    elif "idcw" or "dividend" in name.lower():
+                        dg = "IDCW"
+                    else:
+                        dg = ""
+
+                    if "direct" in name.lower():
+                        inv_src = "Direct"
+                    elif "regular" in name.lower():
+                        inv_src = "Regular"
+                    else:
+                        inv_src = ""
+                    date = datetime.strptime(l[7], "%d-%b-%Y")
+                    try:
+                        nav = float(l[4].strip()) 
+                        new_record = {
+                                "Structure": Structure,
+                                "Category": Category, 
+                                "Sub-Category": Sub_Category,
+                                "AMC": amc, 
+                                "Code": code, 
+                                "Name": name,
+                                "Source": inv_src,
+                                "Option" : dg,
+                                "date":date, 
+                                "nav": nav
+                        }
+                        final.append(new_record)
+                        all.append(new_record)    
+                    except:
+                        print(f"This is not a float nav value {l[4]}")
+                        nav = l[4].strip()
+                        new_record = {
+                                "Structure": Structure,
+                                "Category": Category, 
+                                "Sub-Category": Sub_Category,
+                                "AMC": amc, 
+                                "Code": code, 
+                                "Name": name,
+                                "Source": inv_src,
+                                "Option" : dg,
+                                "date":date, 
+                                "nav": nav
+                        }
+                        error.append(new_record)
+                        all.append(new_record)
+                n+=1
+        return [all, final, error]
+                    
+                    
+                        
         
     # def get_data():
         
@@ -85,3 +163,4 @@ te = datetime.now()
 print(txt)
 ti = te-ts
 print(ti)
+data = aa.transform(txt)
