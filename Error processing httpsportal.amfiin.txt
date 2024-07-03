@@ -1,0 +1,11 @@
+Error processing https://portal.amfiindia.com/DownloadNAVHistoryReport_Po.aspx?&frmdt=27-Nov-2012&todt=24-Feb-2013: 
+Error processing https://portal.amfiindia.com/DownloadNAVHistoryReport_Po.aspx?&frmdt=25-Feb-2013&todt=25-May-2013:
+Error processing https://portal.amfiindia.com/DownloadNAVHistoryReport_Po.aspx?&frmdt=24-Aug-2013&todt=21-Nov-2013:
+Error processing https://portal.amfiindia.com/DownloadNAVHistoryReport_Po.aspx?&frmdt=19-Aug-2014&todt=16-Nov-2014:
+Error processing https://portal.amfiindia.com/DownloadNAVHistoryReport_Po.aspx?&frmdt=29-Jul-2018&todt=26-Oct-2018:
+Error fetching https://portal.amfiindia.com/DownloadNAVHistoryReport_Po.aspx?&frmdt=22-Oct-2019&todt=19-Jan-2020: Cannot connect to host portal.amfiindia.com:443 ssl:default [The semaphore timeout period has expired]
+Error processing https://portal.amfiindia.com/DownloadNAVHistoryReport_Po.aspx?&frmdt=14-Jan-2021&todt=13-Apr-2021:
+Error processing https://portal.amfiindia.com/DownloadNAVHistoryReport_Po.aspx?&frmdt=14-Apr-2021&todt=12-Jul-2021:
+Error processing https://portal.amfiindia.com/DownloadNAVHistoryReport_Po.aspx?&frmdt=09-Apr-2022&todt=07-Jul-2022:
+Error processing https://portal.amfiindia.com/DownloadNAVHistoryReport_Po.aspx?&frmdt=01-Oct-2023&todt=29-Dec-2023:
+Error processing https://portal.amfiindia.com/DownloadNAVHistoryReport_Po.aspx?&frmdt=30-Dec-2023&todt=28-Mar-2024:

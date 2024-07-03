@@ -5,15 +5,21 @@ The main problem is in NAV there are some error value which is not the ideal flo
 keep them to refer again while cleaning the data. 
 """
 import asyncio
+import pandas as pd
 from datetime import datetime, timedelta
 import aiohttp
 import mysql.connector
+from sqlalchemy import create_engine
+
 
 
 
 class Err:
     def __init__(self):
-        self.cnx = mysql.connector.connect(user='root', password='De$#Ka@)*01Zz')
+        self.user = 'root'
+        self.password = 'De$#Ka@)*01Zz'
+        self.host = "localhost"
+        self.cnx = mysql.connector.connect(user=self.user, password=self.password)
         if self.cnx.is_connected() == True:
             print("Connection made!")
         self.links = self.linkgen()
@@ -46,37 +52,81 @@ class Err:
         return links
 
     def check_db(self, dbname: str) -> bool:
-        a = self.cnx.cursor()
-        a.execute("SHOW DATABASES;")
-        dbl = []
-        for n in a:
-            dbl.append(n[0])
-        if dbname not in dbl:
-            print("i did execute")
-            a.execute(f"CREATE DATABASE IF NOT EXISTS {dbname};")
-        self.cnx.close()
+        try:
+            a = self.cnx.cursor()
+            a.execute("SHOW DATABASES;")
+            dbl = [n[0] for n in a]
+            if dbname not in dbl:
+                print("Database does not exist. Creating database...")
+                a.execute(f"CREATE DATABASE {dbname};")
+                print(f"Database {dbname} created successfully.")
+                return True
+            else:
+                print(f"Database {dbname} already exists.")
+                return False
+        finally:
+            print("Closing connection...")
+            self.cnx.close()
         
+    def insert_dataframe(self, dbname: str, df: pd.DataFrame, table_name: str):
+        # Connect to the specified database
+        connection_string = f'mysql+mysqlconnector://{self.user}:{self.password}@{self.host}/{dbname}'
+        engine = create_engine(connection_string)
 
-    async def get_corrupted_data(self):
+        # Insert the DataFrame into the specified table
+        df.to_sql(name=table_name, con=engine, if_exists='append', index=False)
+        print(f"Data inserted into table {table_name} in database {dbname}.")
+
+    async def get_data(self,l):
         async with aiohttp.ClientSession() as session:
-            result = [session.get(i) for i in self.links]
-            response = await asyncio.gather(*result)
+            result = [session.get(i) for i in l]
+            response = await asyncio.gather(*result, return_exceptions=True)
             ri = []
-            for i in response:
-                print(i.status)
-                ri.append(await i.text())
-        return ri
+            re = []
+            required_text = "Scheme Code;Scheme Name;ISIN Div Payout/ISIN Growth;ISIN Div Reinvestment;Net Asset Value;Repurchase Price;Sale Price;Date"
+            for i, resp in enumerate(response):
+                if isinstance(resp, Exception):
+                    re.append(l[i])
+                    print(f"Error fetching {l[i]} : {resp}")
+                else:
+                    print(resp.status)
+                    try:
+                        text = await resp.text()
+                        if required_text in text:
+                            ri.append(text)
+                        else:
+                            re.append(l[i])
+                            print(f"Required text not found in {l[i]}")
+                    except Exception as e:
+                        re.append(l[i])
+                        print(f"Error processing {l[i]} : {e}")
+        print(f"Out of {len(l)} / {len(ri)} gave response")
+        return ri,re
     
+# Scheme Code;Scheme Name;ISIN Div Payout/ISIN Growth;ISIN Div Reinvestment;Net Asset Value;Repurchase Price;Sale Price;Date
+    def getall(self):
+        lin = self.links
+        data = []
+        while int(len(lin)) != 0:
+            a,b = asyncio.run(self.get_data(lin))
+            print(a)
+            lin = b
+            data.append(a)
+            print(len(lin))
+        return data
 
-    def transform(self, txt):
+    def transform(self,txt):
+        txt = [j for i in txt for j in i]
         all = []
         final = []
         error = []
         for i in txt:
-            i= i.split("\r\n")
+            i = i.split("\r\n")
             n = 1
             for j in i[1:]:
                 l = j.split(";")
+                if n == len(i)-1:
+                    break
                 if l[0] == "":
                     if i[n] == i[n+1]:
                         sch_cat = i[n-1].split("(")
@@ -105,7 +155,6 @@ class Err:
                         dg = "IDCW"
                     else:
                         dg = ""
-
                     if "direct" in name.lower():
                         inv_src = "Direct"
                     elif "regular" in name.lower():
@@ -130,7 +179,7 @@ class Err:
                         final.append(new_record)
                         all.append(new_record)    
                     except:
-                        print(f"This is not a float nav value {l[4]}")
+                        # print(f"This is not a float nav value {l[4]}")
                         nav = l[4].strip()
                         new_record = {
                                 "Structure": Structure,
@@ -147,11 +196,12 @@ class Err:
                         error.append(new_record)
                         all.append(new_record)
                 n+=1
+
         return [all, final, error]
                     
                     
                         
         
-    # def get_data():
+    
         
     
