@@ -27,7 +27,7 @@ def split_date_range(start_date_str, end_date_str, max_duration=90):
     end_date = datetime.strptime(end_date_str, "%d-%b-%Y")
 
     date_ranges = []
-#So now i need to thing of a better schema for MongoDB
+
     current_date = start_date
     while current_date <= end_date:
         # Calculate the end of the current sub-range
