@@ -16,8 +16,7 @@ o = 1
 for d in data:
     data = aa.transform(d)
     print("Tranformer🤖", o)
-    # print(f"All {data[:6]}")
-    aa.insert_dataframe("dbname", "MutualFund", data)
+    aa.insert_data("dbname", "MutualFund", data)
     print(f"{o} data is inserted completely")
     o += 1
 

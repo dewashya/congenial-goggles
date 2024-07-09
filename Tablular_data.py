@@ -1,11 +1,10 @@
 """
-In this Script I try to extract Error NAV value and Scheme Code
+My Masters final year project - 
+-------------------------------MF Recommand----------------------------------
 
-The main problem is in NAV there are some error value which is not the ideal float value. i want to figure out those rows and 
-keep them to refer again while cleaning the data. 
+this code is used to download data from amfi website and store it into mysql databse.
 """
 import asyncio
-import pandas as pd
 from datetime import datetime, timedelta
 import aiohttp
 import mysql.connector
@@ -60,6 +59,7 @@ class Err:
             start = "03-Apr-2006"
         else:
             start = checkstart
+        # start = "03-Jul-2024"
         end = (datetime.today()- timedelta(days=1)).strftime("%d-%b-%Y")
         date = self.split_date(start, end)
         links = []
@@ -109,7 +109,7 @@ class Err:
             # print("Closing connection...")
             # self.cnx.close()
         
-    def insert_dataframe(self, dbname: str, table_name: str, data):
+    def insert_data(self, dbname: str, table_name: str, data):
         try:
             cursor = self.cnx.cursor()
 
@@ -131,7 +131,7 @@ class Err:
                 ON DUPLICATE KEY UPDATE 
                     NAV = VALUES(NAV)
             """
-
+            prepared_data = []
             for row in data:
                 # Compute hash for relevant columns (excluding NAV and Hash_Column)
                 hash_columns = row[:-1]  # Exclude NAV and Hash_Column
@@ -139,9 +139,10 @@ class Err:
                 
                 # Append hash value to row
                 row = row + (hash_value,)
+                prepared_data.append(row)
                 
                 # Execute SQL with row data
-                cursor.execute(sql, row)
+            cursor.executemany(sql, prepared_data)
 
             # Commit the transaction
             self.cnx.commit()
@@ -166,16 +167,16 @@ class Err:
             cursor.execute(f"""
                 CREATE TABLE {dbname}.{table_name} (
                     id INT AUTO_INCREMENT PRIMARY KEY,
-                    Structure VARCHAR(255),
-                    Category VARCHAR(255),
-                    Sub_Category VARCHAR(255),
+                    Structure VARCHAR(100),
+                    Category VARCHAR(100),
+                    Sub_Category VARCHAR(100),
                     AMC VARCHAR(255),
                     Code INT,
                     Name VARCHAR(255),
-                    Inv_Source VARCHAR(255),
-                    Option_type VARCHAR(255),
+                    Inv_Source VARCHAR(100),
+                    Option_type VARCHAR(100),
                     Date DATE,
-                    NAV VARCHAR(255),
+                    NAV VARCHAR(100),
                     Hash_Column VARCHAR(64),
                     UNIQUE (Hash_Column)
                 )
@@ -229,7 +230,7 @@ class Err:
         print(f"Out of {len(l)} / {len(ri)} gave response")
         return ri,re
     
-# Scheme Code;Scheme Name;ISIN Div Payout/ISIN Growth;ISIN Div Reinvestment;Net Asset Value;Repurchase Price;Sale Price;Date
+
     def getall(self):
         lin = self.links
         data = []
@@ -291,18 +292,6 @@ class Err:
                     inv_src = ""
                 date = datetime.strptime(l[7], "%d-%b-%Y").strftime('%Y-%m-%d')
                 nav = l[4].strip()
-                # new_record = {
-                #         "Structure": Structure,
-                #         "Category": Category, 
-                #         "Sub-Category": Sub_Category,
-                #         "AMC": amc, 
-                #         "Code": code, 
-                #         "Name": name,
-                #         "Source": inv_src,
-                #         "Option" : dg,
-                #         "date":date, 
-                #         "nav": nav
-                # }
                 new_record = (Structure, Category, Sub_Category, amc, code, name, inv_src, dg, date, nav)
                 all.append(new_record)
             n+=1
