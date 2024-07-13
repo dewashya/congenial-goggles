@@ -8,14 +8,13 @@ import asyncio
 from datetime import datetime, timedelta
 import aiohttp
 import mysql.connector
-from sqlalchemy import create_engine
 from mysql.connector import errorcode
 import hashlib
 
 
 
 
-class Err:
+class MFRecommand:
     def __init__(self):
         self.user = 'root'
         self.password = 'De$#Ka@)*01Zz'
@@ -109,7 +108,7 @@ class Err:
             # print("Closing connection...")
             # self.cnx.close()
         
-    def insert_data(self, dbname: str, table_name: str, data):
+    def insert_data(self, dbname: str, table_name: str, data, batch_size=100000):
         try:
             cursor = self.cnx.cursor()
 
@@ -136,16 +135,17 @@ class Err:
                 # Compute hash for relevant columns (excluding NAV and Hash_Column)
                 hash_columns = row[:-1]  # Exclude NAV and Hash_Column
                 hash_value = self.create_hash(hash_columns)
-                
                 # Append hash value to row
                 row = row + (hash_value,)
                 prepared_data.append(row)
-                
-                # Execute SQL with row data
-            cursor.executemany(sql, prepared_data)
 
+
+            for i in range(0, len(prepared_data), batch_size):
+                batch = prepared_data[i:i + batch_size]
+                cursor.executemany(sql, batch)
+                self.cnx.commit()
+                print(f"Inserted batch {i // batch_size + 1}")
             # Commit the transaction
-            self.cnx.commit()
             print(f"{cursor.rowcount} rows were inserted into '{table_name}'.")
 
         except mysql.connector.Error as err:
@@ -182,9 +182,6 @@ class Err:
                 )
             """)
             print(f"Table '{table_name}' created successfully.")
-
-            cursor.close()
-
         except mysql.connector.Error as err:
             if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
                 print("Something is wrong with your user name or password")
@@ -192,6 +189,8 @@ class Err:
                 print("Database does not exist")
             else:
                 print(err)
+        finally:
+             cursor.close()
 
     def create_hash(self, columns):
         concat_string = '|'.join(map(str, columns))  # Concatenate columns into a string
